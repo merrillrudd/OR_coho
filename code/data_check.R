@@ -4,15 +4,10 @@ rm(list=ls())
 ## load packages
 ####################
 
-devtools::install_github("james-thorson/VAST", ref='development')
-devtools::install_github("merrillrudd/VASTPlotUtils")
 devtools::install_github("merrillrudd/RuddR")
 
-library(VAST)
-library(TMB)
 library(tidyverse)
 library(RuddR)
-library(VASTPlotUtils)
 
 ###################
 ## Directories
