@@ -27,6 +27,7 @@ spawn_raw <- read.csv(file.path(data_dir, "spawners_wNetwork.csv"))
 juv_raw <- read.csv(file.path(data_dir, "juveniles_wNetwork.csv"))
 hab_data_raw <- read.csv(file.path(data_dir, "habitat_wNetwork.csv"))
 hab_siletz_raw <- read.csv(file.path(data_dir, "habitat_Siletz.csv"))
+
 ## read network from habitat data
 net_fromHab <- unique(hab_data_raw %>% select(Population, ParentNode, ChildNode, Shape_Leng, Node_WGSX, Node_WGSY, Coho_distr) %>% rename(parent_s=ParentNode, child_s=ChildNode, dist_s=Shape_Leng, Lon=Node_WGSX, Lat=Node_WGSY))
 
