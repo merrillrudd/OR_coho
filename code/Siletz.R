@@ -266,7 +266,7 @@ n_i_juv <- nrow(Data_count_juv)
 ### all data
 X_gtp_all <- array(0, dim=c(n_x,n_t,n_p))
 for(p in 1:n_p){
-	psub <- hab_df %>% filter(variable == habvar_all[p])
+	psub <- hab_df %>% filter(variable == habvar[p])
 	mat <- matrix(0, nrow=n_x, ncol=1)
 	mat[psub$child_s,1] <- as.numeric(psub$value)
 	mat_sd <- (mat - mean(mat))/sd(mat)
