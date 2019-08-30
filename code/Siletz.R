@@ -6,7 +6,7 @@ rm(list=ls())
 
 # devtools::install_github("merrillrudd/FishStatsUtils", ref="stream")
 # devtools::install_github("james-thorson/VAST", ref='development')
-# devtools::install_github("merrillrudd/VASTPlotUtils")
+devtools::install_github("merrillrudd/VASTPlotUtils")
 
 library(VAST)
 library(TMB)
@@ -447,15 +447,17 @@ fit$parameter_estimates$diagnostics
 saveRDS(fit, file.path(path, "Fit.rds"))    
 
 fit <- readRDS(file.path(path, "Fit.rds")) 
+spawn_fit <- fit
 
 plot_maps(plot_set=c(1:7,11,13:14), Report=fit$Report, Sdreport=fit$parameter_estimates$SD, TmbData=fit$data_list, spatial_list=fit$spatial_list, DirName=fig, category_names="Spawners", cex=0.5)
 plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, DirName=fig, category_names="Spawners")
 map_list = make_map_info( "Region"=settings$Region, "spatial_list"=fit$spatial_list, "Extrapolation_List"=fit$extrapolation_list )
 Enc_prob = plot_encounter_diagnostic( Report=fit$Report, Data_Geostat=cbind("Catch_KG"=fit$data_frame[,'b_i']), DirName=fig)
 plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names="Spawners")
+plot_residuals(fit = fit, Data = Data, Network_sz_LL = Network_sz_LL, category_names=c("Spawners"), FilePath=fig)
 
 ########################
-## spawners_habitat_discrete
+## spawners_basichab_discrete
 #########################
 path <- file.path(sil_dir, 'spawners_basichab_discrete')
 dir.create(path, showWarnings=FALSE)
@@ -694,7 +696,7 @@ Data <- Data_count_juv
 # Data$Catch_KG[which(Data$Catch_KG > 0)] <- log(Data$Catch_KG[which(Data$Catch_KG > 0)])
 
 ## turn on spatial and spatiotemporal effects
-FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=1, "Epsilon2"=0)
+FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=1, "Epsilon2"=1)
 
 ## IID structure on temporal intercepts
 RhoConfig = c("Beta1"=3, "Beta2"=1, "Epsilon1"=0, "Epsilon2"=0)
@@ -733,7 +735,7 @@ fit0 = fit_model( "settings"=settings,
 Par <- fit0$tmb_list$Parameters
 Map <- fit0$tmb_list$Map
 # Map[["beta1_ft"]] <- factor(rep(NA, length(Par[["beta1_ft"]])))
-Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
+# Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
 
 # first model run
 fit1 = fit_model( "settings"=settings, 
@@ -752,7 +754,8 @@ fit1 = fit_model( "settings"=settings,
                   model_args = list(Map = Map),
                   X_gtp = X_gtp_juv, X_itp = X_itp_juv,
                   Xconfig_zcp = Xconfig_juv,
-                  optimize_args = list(getsd=FALSE, newtonsteps=0))
+                  optimize_args = list(getsd=FALSE, newtonsteps=0),
+                  test_fit=FALSE)
 check <- TMBhelper::Check_Identifiable(fit1$tmb_list$Obj) 
 
 fit1$parameter_estimates$diagnostics
@@ -773,7 +776,8 @@ fit = fit_model( "settings"=settings,
                   Network_sz = Network_sz,
                   model_args = list(Map = Map),
                   X_gtp = X_gtp_juv, X_itp = X_itp_juv,
-                  Xconfig_zcp = Xconfig_juv)
+                  Xconfig_zcp = Xconfig_juv,
+                  test_fit=FALSE)
 
 fit$parameter_estimates$diagnostics
 
@@ -781,11 +785,143 @@ saveRDS(fit, file.path(path, "Fit.rds"))
 
 fit <- readRDS(file.path(path, "Fit.rds")) 
 
-plot_maps(plot_set=c(1:7,11,13:14), Report=fit$Report, Sdreport=fit$parameter_estimates$SD, TmbData=fit$data_list, spatial_list=fit$spatial_list, DirName=fig, category_names="Spawners", cex=0.5)
-plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, DirName=fig, category_names="Spawners")
+plot_maps(plot_set=c(1:7,11,13:14), Report=fit$Report, Sdreport=fit$parameter_estimates$SD, TmbData=fit$data_list, spatial_list=fit$spatial_list, DirName=fig, category_names="Juveniles", cex=0.5)
+plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, DirName=fig, category_names="Juveniles")
 map_list = make_map_info( "Region"=settings$Region, "spatial_list"=fit$spatial_list, "Extrapolation_List"=fit$extrapolation_list )
 Enc_prob = plot_encounter_diagnostic( Report=fit$Report, Data_Geostat=cbind("Catch_KG"=fit$data_frame[,'b_i']), DirName=fig)
-plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names="Spawners")
+plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names="Juveniles")
+
+########################
+## juveniles_spawners_habitat_discrete
+#########################
+path <- file.path(sil_dir, 'juveniles_spawners_habitat_discrete')
+dir.create(path, showWarnings=FALSE)
+setwd(path)
+
+fig <- file.path(path, "figures")
+dir.create(fig, showWarnings=FALSE)
+
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.cpp"), to = path)
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.dll"), to = path)
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.o"), to = path)
+
+
+## spawners only
+Data <- Data_count_juv
+# Data$Catch_KG[which(Data$Catch_KG > 0)] <- log(Data$Catch_KG[which(Data$Catch_KG > 0)])
+
+## turn on spatial and spatiotemporal effects
+FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=1, "Epsilon2"=0)
+
+## IID structure on temporal intercepts
+RhoConfig = c("Beta1"=3, "Beta2"=1, "Epsilon1"=0, "Epsilon2"=0)
+
+## gamma distribution, conventional delta link model
+ObsModel = c("PosDist"=11,"Link"=0)
+
+## other options
+OverdispersionConfig = c("Eta1"=0, "Eta2"=0)
+Options =  c("Calculate_Range"=1, 
+            "Calculate_effective_area"=1)
+
+## wrapper function to set up common settings
+settings <- make_settings(n_x = nrow(Network_sz), Region = "Stream_network", FieldConfig=FieldConfig, RhoConfig=RhoConfig, OverdispersionConfig=OverdispersionConfig, Options=Options, ObsModel=ObsModel, purpose = "index", fine_scale=FALSE, bias.correct=FALSE)
+settings$Method <- "Stream_network"
+settings$grid_size_km <- 1
+
+X_gtp_juv_spawn <- array(0, dim=c(dim(X_gtp_juv)[1:2], dim(X_gtp_juv)[3]+1))
+X_gtp_juv_spawn[,,1:dim(X_gtp_juv)[3]] <- X_gtp_juv
+
+X_itp_juv_spawn <- array(0, dim=c(dim(X_itp_juv)[1:2], dim(X_itp_juv)[3]+1))
+X_itp_juv_spawn[,,1:dim(X_itp_juv)[3]] <- X_itp_juv
+
+
+sdens <- spawn_fit$Report$D_gcy[,1,]
+spawn_years <- unique(Data_count_spawn$Year)[order(unique(Data_count_spawn$Year))]
+juv_years <- unique(Data_count_juv$Year)[order(unique(Data_count_juv$Year))]
+which(spawn_years %in% juv_years)
+X_gtp_juv_spawn[,2:21,dim(X_gtp_juv_spawn)[3]] <- sdens
+
+X_itp_juv_spawn[,2:21,dim(X_gtp_juv_spawn)[3]] <- sdens[which(net_nodes %in% Data_count_juv$Knot)]
+
+Xconfig_juv_spawn <- array(1,dim=c(2,1,dim(X_gtp_juv_spawn)[3]))
+Xconfig_juv_spawn[,,1:dim(X_gtp_juv)[3]] <- Xconfig_juv
+
+# check estimated parameters
+fit0 = fit_model( "settings"=settings, 
+                  "Lat_i"=Data[,"Lat"], 
+                  "Lon_i"=Data[,"Lon"], 
+                  "t_iz"=Data[,'Year'], 
+                  "c_i"=rep(0,nrow(Data)), 
+                  "b_i"=Data[,'Catch_KG'], 
+                  "a_i"=Data[,'AreaSwept_km2'], 
+                  working_dir=path,
+                  extrapolation_args=list(
+                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])),
+                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+                  Network_sz = Network_sz,
+                  run_model = FALSE,
+                  X_gtp = X_gtp_juv_spawn, X_itp = X_itp_juv_spawn,
+                  Xconfig_zcp = Xconfig_juv_spawn)
+
+
+Par <- fit0$tmb_list$Parameters
+Map <- fit0$tmb_list$Map
+# Map[["beta1_ft"]] <- factor(rep(NA, length(Par[["beta1_ft"]])))
+Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
+
+# first model run
+fit1 = fit_model( "settings"=settings, 
+                  "Lat_i"=Data[,"Lat"], 
+                  "Lon_i"=Data[,"Lon"], 
+                  "t_iz"=Data[,'Year'], 
+                  "c_i"=rep(0,nrow(Data)), 
+                  "b_i"=Data[,'Catch_KG'], 
+                  "a_i"=Data[,'AreaSwept_km2'], 
+                  "v_i"=Data[,'Vessel'], 
+                  working_dir = path,
+                  extrapolation_args=list(
+                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
+                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+                  Network_sz = Network_sz,
+                  model_args = list(Map = Map),
+                  X_gtp = X_gtp_juv_spawn, X_itp = X_itp_juv_spawn,
+                  Xconfig_zcp = Xconfig_juv_spawn,
+                  optimize_args = list(getsd=FALSE, newtonsteps=0))
+check <- TMBhelper::Check_Identifiable(fit1$tmb_list$Obj) 
+
+fit1$parameter_estimates$diagnostics
+
+## run the model
+fit = fit_model( "settings"=settings, 
+                  "Lat_i"=Data[,"Lat"], 
+                  "Lon_i"=Data[,"Lon"], 
+                  "t_iz"=Data[,'Year'], 
+                  "c_i"=rep(0,nrow(Data)), 
+                  "b_i"=Data[,'Catch_KG'], 
+                  "a_i"=Data[,'AreaSwept_km2'], 
+                  "v_i"=Data[,'Vessel'], 
+                  working_dir = path,
+                  extrapolation_args=list(
+                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
+                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+                  Network_sz = Network_sz,
+                  model_args = list(Map = Map),
+                  X_gtp = X_gtp_juv_spawn, X_itp = X_itp_juv_spawn,
+                  Xconfig_zcp = Xconfig_juv_spawn)
+
+fit$parameter_estimates$diagnostics
+
+saveRDS(fit, file.path(path, "Fit.rds"))    
+
+fit <- readRDS(file.path(path, "Fit.rds")) 
+
+plot_maps(plot_set=c(1:7,11,13:14), Report=fit$Report, Sdreport=fit$parameter_estimates$SD, TmbData=fit$data_list, spatial_list=fit$spatial_list, DirName=fig, category_names="Juveniles", cex=0.5)
+plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, DirName=fig, category_names="Juveniles")
+map_list = make_map_info( "Region"=settings$Region, "spatial_list"=fit$spatial_list, "Extrapolation_List"=fit$extrapolation_list )
+Enc_prob = plot_encounter_diagnostic( Report=fit$Report, Data_Geostat=cbind("Catch_KG"=fit$data_frame[,'b_i']), DirName=fig)
+plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names="Juveniles")
+plot_residuals(fit = fit, Data = Data, Network_sz_LL = Network_sz_LL, category_names=c("Juveniles"), FilePath=fig)
 
 ########################
 ## juveniles_basichab_discrete
@@ -1025,7 +1161,7 @@ Data <- Data_count
 # Data$Catch_KG[which(Data$Catch_KG > 0)] <- log(Data$Catch_KG[which(Data$Catch_KG > 0)])
 
 ## turn on spatial and spatiotemporal effects
-FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=2, "Epsilon2"=0)
+FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=2, "Epsilon2"=2)
 
 ## IID structure on temporal intercepts
 RhoConfig = c("Beta1"=3, "Beta2"=1, "Epsilon1"=0, "Epsilon2"=0)
@@ -1083,7 +1219,8 @@ fit1 = fit_model( "settings"=settings,
                   model_args = list(Map = Map),
                   X_gtp = X_gtp_all, X_itp = X_itp_all,
                   Xconfig_zcp = Xconfig_all,
-                  optimize_args = list(getsd=FALSE, newtonsteps=0))
+                  optimize_args = list(getsd=FALSE, newtonsteps=0),
+                  test_fit=FALSE)
 check <- TMBhelper::Check_Identifiable(fit1$tmb_list$Obj) 
 
 fit1$parameter_estimates$diagnostics
@@ -1104,7 +1241,8 @@ fit = fit_model( "settings"=settings,
                   Network_sz = Network_sz,
                   model_args = list(Map = Map),
                   X_gtp = X_gtp_all, X_itp = X_itp_all,
-                  Xconfig_zcp = Xconfig_all)
+                  Xconfig_zcp = Xconfig_all,
+                  test_fit=FALSE)
 
 fit$parameter_estimates$diagnostics
 
@@ -1117,6 +1255,123 @@ plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, D
 map_list = make_map_info( "Region"=settings$Region, "spatial_list"=fit$spatial_list, "Extrapolation_List"=fit$extrapolation_list )
 Enc_prob = plot_encounter_diagnostic( Report=fit$Report, Data_Geostat=cbind("Catch_KG"=fit$data_frame[,'b_i']), DirName=fig)
 plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names=c("Spawners","Juveniles"))
+plot_residuals(fit = fit, Data = Data, Network_sz_LL = Network_sz_LL, category_names=c("Spawners","Juveniles"), FilePath=fig)
+
+########################
+## multivar_habitat_discrete_AR
+#########################
+path <- file.path(sil_dir, 'multivar_habitat_discrete_AR')
+dir.create(path, showWarnings=FALSE)
+setwd(path)
+
+fig <- file.path(path, "figures")
+dir.create(fig, showWarnings=FALSE)
+
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.cpp"), to = path)
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.dll"), to = path)
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.o"), to = path)
+
+
+## spawners only
+Data <- Data_count
+# Data$Catch_KG[which(Data$Catch_KG > 0)] <- log(Data$Catch_KG[which(Data$Catch_KG > 0)])
+
+## turn on spatial and spatiotemporal effects
+FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=2, "Epsilon2"=2)
+
+## IID structure on temporal intercepts
+RhoConfig = c("Beta1"=3, "Beta2"=1, "Epsilon1"=0, "Epsilon2"=4)
+
+## gamma distribution, conventional delta link model
+ObsModel = c("PosDist"=11,"Link"=0)
+
+## other options
+OverdispersionConfig = c("Eta1"=0, "Eta2"=0)
+Options =  c("Calculate_Range"=1, 
+            "Calculate_effective_area"=1)
+
+## wrapper function to set up common settings
+settings <- make_settings(n_x = nrow(Network_sz), Region = "Stream_network", FieldConfig=FieldConfig, RhoConfig=RhoConfig, OverdispersionConfig=OverdispersionConfig, Options=Options, ObsModel=ObsModel, purpose = "index", fine_scale=FALSE, bias.correct=FALSE)
+settings$Method <- "Stream_network"
+settings$grid_size_km <- 1
+
+# check estimated parameters
+fit0 = fit_model( "settings"=settings, 
+                  "Lat_i"=Data[,"Lat"], 
+                  "Lon_i"=Data[,"Lon"], 
+                  "t_iz"=Data[,'Year'], 
+                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+                  "b_i"=Data[,'Catch_KG'], 
+                  "a_i"=Data[,'AreaSwept_km2'], 
+                  working_dir=path,
+                  extrapolation_args=list(
+                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])),
+                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+                  Network_sz = Network_sz,
+                  run_model = FALSE,
+                  X_gtp = X_gtp_all, X_itp = X_itp_all,
+                  Xconfig_zcp = Xconfig_all)
+
+
+Par <- fit0$tmb_list$Parameters
+Map <- fit0$tmb_list$Map
+# Map[["beta1_ft"]] <- factor(rep(NA, length(Par[["beta1_ft"]])))
+Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
+
+# first model run
+fit1 = fit_model( "settings"=settings, 
+                  "Lat_i"=Data[,"Lat"], 
+                  "Lon_i"=Data[,"Lon"], 
+                  "t_iz"=Data[,'Year'], 
+                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+                  "b_i"=Data[,'Catch_KG'], 
+                  "a_i"=Data[,'AreaSwept_km2'], 
+                  "v_i"=Data[,'Vessel'], 
+                  working_dir = path,
+                  extrapolation_args=list(
+                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
+                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+                  Network_sz = Network_sz,
+                  model_args = list(Map = Map),
+                  X_gtp = X_gtp_all, X_itp = X_itp_all,
+                  Xconfig_zcp = Xconfig_all,
+                  optimize_args = list(getsd=FALSE, newtonsteps=0),
+                  test_fit=FALSE)
+check <- TMBhelper::Check_Identifiable(fit1$tmb_list$Obj) 
+
+fit1$parameter_estimates$diagnostics
+
+## run the model
+fit = fit_model( "settings"=settings, 
+                  "Lat_i"=Data[,"Lat"], 
+                  "Lon_i"=Data[,"Lon"], 
+                  "t_iz"=Data[,'Year'], 
+                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+                  "b_i"=Data[,'Catch_KG'], 
+                  "a_i"=Data[,'AreaSwept_km2'], 
+                  "v_i"=Data[,'Vessel'], 
+                  working_dir = path,
+                  extrapolation_args=list(
+                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
+                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+                  Network_sz = Network_sz,
+                  model_args = list(Map = Map),
+                  X_gtp = X_gtp_all, X_itp = X_itp_all,
+                  Xconfig_zcp = Xconfig_all,
+                  test_fit=FALSE)
+
+fit$parameter_estimates$diagnostics
+
+saveRDS(fit, file.path(path, "Fit.rds"))    
+
+fit <- readRDS(file.path(path, "Fit.rds")) 
+
+plot_maps(plot_set=c(1:7,11,13:14), Report=fit$Report, Sdreport=fit$parameter_estimates$SD, TmbData=fit$data_list, spatial_list=fit$spatial_list, DirName=fig, category_names=c("Spawners","Juveniles"), cex=0.5)
+plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, DirName=fig, category_names=c("Spawners","Juveniles"))
+map_list = make_map_info( "Region"=settings$Region, "spatial_list"=fit$spatial_list, "Extrapolation_List"=fit$extrapolation_list )
+Enc_prob = plot_encounter_diagnostic( Report=fit$Report, Data_Geostat=cbind("Catch_KG"=fit$data_frame[,'b_i']), DirName=fig)
+plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names=c("Spawners","Juveniles"))
+plot_residuals(fit = fit, Data = Data, Network_sz_LL = Network_sz_LL, category_names=c("Spawners","Juveniles"), FilePath=fig)
 
 ########################
 ## multivar_discrete
@@ -1138,7 +1393,7 @@ Data <- Data_count
 # Data$Catch_KG[which(Data$Catch_KG > 0)] <- log(Data$Catch_KG[which(Data$Catch_KG > 0)])
 
 ## turn on spatial and spatiotemporal effects
-FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=2, "Epsilon2"=0)
+FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=2, "Epsilon2"=2)
 
 ## IID structure on temporal intercepts
 RhoConfig = c("Beta1"=3, "Beta2"=1, "Epsilon1"=0, "Epsilon2"=0)
@@ -1174,8 +1429,8 @@ fit0 = fit_model( "settings"=settings,
 
 Par <- fit0$tmb_list$Parameters
 Map <- fit0$tmb_list$Map
-Map[["beta1_ft"]] <- factor(rep(NA, length(Par[["beta1_ft"]])))
-# Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
+# Map[["beta1_ft"]] <- factor(rep(NA, length(Par[["beta1_ft"]])))
+Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
 
 # first model run
 fit1 = fit_model( "settings"=settings, 
@@ -1192,7 +1447,8 @@ fit1 = fit_model( "settings"=settings,
                   spatial_args=list(Network_sz_LL=Network_sz_LL),
                   Network_sz = Network_sz,
                   model_args = list(Map = Map),
-                  optimize_args = list(getsd=FALSE, newtonsteps=0))
+                  optimize_args = list(getsd=FALSE, newtonsteps=0),
+                  test_fit=FALSE)
 check <- TMBhelper::Check_Identifiable(fit1$tmb_list$Obj) 
 
 fit1$parameter_estimates$diagnostics
@@ -1211,7 +1467,8 @@ fit = fit_model( "settings"=settings,
                     input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
                   spatial_args=list(Network_sz_LL=Network_sz_LL),
                   Network_sz = Network_sz,
-                  model_args = list(Map = Map))
+                  model_args = list(Map = Map),
+                  test_fit=FALSE)
 
 fit$parameter_estimates$diagnostics
 
@@ -1224,6 +1481,7 @@ plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, D
 map_list = make_map_info( "Region"=settings$Region, "spatial_list"=fit$spatial_list, "Extrapolation_List"=fit$extrapolation_list )
 Enc_prob = plot_encounter_diagnostic( Report=fit$Report, Data_Geostat=cbind("Catch_KG"=fit$data_frame[,'b_i']), DirName=fig)
 plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names=c("Spawners","Juveniles"))
+plot_residuals(fit = fit, Data = Data, Network_sz_LL = Network_sz_LL, category_names=c("Spawners","Juveniles"), FilePath=fig)
 
 ########################
 ## multivar_basichab_discrete
@@ -1247,7 +1505,7 @@ Xconfig_inp <- array(0, dim=c(2,2,dim(X_gtp_all)[3]))
 Xconfig_inp[,,1:2] <- 1
 
 ## turn on spatial and spatiotemporal effects
-FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=2, "Epsilon2"=0)
+FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=2, "Epsilon2"=2)
 
 ## IID structure on temporal intercepts
 RhoConfig = c("Beta1"=3, "Beta2"=1, "Epsilon1"=0, "Epsilon2"=0)
@@ -1286,7 +1544,7 @@ fit0 = fit_model( "settings"=settings,
 Par <- fit0$tmb_list$Parameters
 Map <- fit0$tmb_list$Map
 # Map[["beta1_ft"]] <- factor(rep(NA, length(Par[["beta1_ft"]])))
-Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
+# Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
 
 # first model run
 fit1 = fit_model( "settings"=settings, 
@@ -1305,7 +1563,8 @@ fit1 = fit_model( "settings"=settings,
                   model_args = list(Map = Map),
                   optimize_args = list(getsd=FALSE, newtonsteps=0),
                   X_gtp = X_gtp_all, X_itp = X_itp_all,
-                  Xconfig_zcp = Xconfig_all2)
+                  Xconfig_zcp = Xconfig_all2,
+                  test_fit=FALSE)
 check <- TMBhelper::Check_Identifiable(fit1$tmb_list$Obj) 
 
 fit1$parameter_estimates$diagnostics
@@ -1326,7 +1585,8 @@ fit = fit_model( "settings"=settings,
                   Network_sz = Network_sz,
                   model_args = list(Map = Map),
                   X_gtp = X_gtp_all, X_itp = X_itp_all,
-                  Xconfig_zcp = Xconfig_all2)
+                  Xconfig_zcp = Xconfig_all2,
+                  test_fit=FALSE)
 
 fit$parameter_estimates$diagnostics
 
@@ -1339,10 +1599,11 @@ plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, D
 map_list = make_map_info( "Region"=settings$Region, "spatial_list"=fit$spatial_list, "Extrapolation_List"=fit$extrapolation_list )
 Enc_prob = plot_encounter_diagnostic( Report=fit$Report, Data_Geostat=cbind("Catch_KG"=fit$data_frame[,'b_i']), DirName=fig)
 plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names=c("Spawners","Juveniles"))
+plot_residuals(fit = fit, Data = Data, Network_sz_LL = Network_sz_LL, category_names=c("Spawners","Juveniles"), FilePath=fig)
 
  df <- data.frame("Model"=c("multivar_discrete",
- 							"multivar_basichab_discrete",
- 							"multivar_habitat_discrete"))
+ 							"multivar_habitat_discrete",
+ 							"multivar_habitat_discrete_AR"))
  df$AIC <- NA
  for(i in 1:nrow(df)){
  	res <- readRDS(file.path(sil_dir, df[i,"Model"], "Fit.rds"))
@@ -1350,5 +1611,471 @@ plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$paramete
  }
  df$deltaAIC <- df$AIC - min(df$AIC)
  df[order(df$deltaAIC),]
+
+
+
+
+### CROSS VALIDATION
+########################
+## multivar_habitat_discrete
+#########################
+path <- file.path(sil_dir, 'crossval_multivar_habitat_discrete')
+dir.create(path, showWarnings=FALSE)
+setwd(path)
+
+fig <- file.path(path, "figures")
+dir.create(fig, showWarnings=FALSE)
+
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.cpp"), to = path)
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.dll"), to = path)
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.o"), to = path)
+
+Data_kfold_spawn <- Data_count_spawn 
+Data_kfold_spawn$Group <- sample(1:10, nrow(Data_kfold_spawn), replace=TRUE)
+Data_kfold_juv <- Data_count_juv 
+Data_kfold_juv$Group <- sample(1:10, nrow(Data_kfold_juv), replace=TRUE)
+
+Data_kfold <- rbind.data.frame(Data_kfold_spawn, Data_kfold_juv)
+table(Data_kfold$Group)
+
+rerun=TRUE
+for(gg in 1:10){
+	path2 <- file.path(path, paste0("Group",gg))
+	dir.create(path2)
+
+	fig2 <- file.path(path2, "figures")
+	dir.create(fig2)
+
+	if(rerun==FALSE){
+		if(file.exists(file.path(path2, "Fit.rds"))) next
+	}
+
+	ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.cpp"), to = path2)
+	ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.dll"), to = path2)
+	ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.o"), to = path2)	
+
+	Data <- Data_kfold %>% filter(Group != gg)
+	# Data$Catch_KG[which(Data$Catch_KG > 0)] <- log(Data$Catch_KG[which(Data$Catch_KG > 0)])	
+
+	n_i_kfold <- nrow(Data)
+	X_itp_kfold <- array(0, dim=c(n_i_kfold,dim(X_gtp_all)[2],n_p))
+	for(i in 1:n_i_kfold){
+		for(p in 1:n_p){
+			knot <- Data$Knot[i]
+			index <- which(net_nodes == knot)
+			X_itp_kfold[i,,p] <- X_gtp_all[index,,p]
+		}
+	}
+
+	## turn on spatial and spatiotemporal effects
+	FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=2, "Epsilon2"=0)	
+
+	## IID structure on temporal intercepts
+	RhoConfig = c("Beta1"=3, "Beta2"=1, "Epsilon1"=0, "Epsilon2"=0)	
+
+	## gamma distribution, conventional delta link model
+	ObsModel = c("PosDist"=11,"Link"=0)	
+
+	## other options
+	OverdispersionConfig = c("Eta1"=0, "Eta2"=0)
+	Options =  c("Calculate_Range"=1, 
+	            "Calculate_effective_area"=1)	
+
+	## wrapper function to set up common settings
+	settings <- make_settings(n_x = nrow(Network_sz), Region = "Stream_network", FieldConfig=FieldConfig, RhoConfig=RhoConfig, OverdispersionConfig=OverdispersionConfig, Options=Options, ObsModel=ObsModel, purpose = "index", fine_scale=FALSE, bias.correct=FALSE)
+	settings$Method <- "Stream_network"
+	settings$grid_size_km <- 1	
+
+	# check estimated parameters
+	fit0 = fit_model( "settings"=settings, 
+	                  "Lat_i"=Data[,"Lat"], 
+	                  "Lon_i"=Data[,"Lon"], 
+	                  "t_iz"=Data[,'Year'], 
+	                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+	                  "b_i"=Data[,'Catch_KG'], 
+	                  "a_i"=Data[,'AreaSwept_km2'], 
+	                  working_dir=path2,
+	                  extrapolation_args=list(
+	                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])),
+	                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+	                  Network_sz = Network_sz,
+	                  run_model = FALSE,
+	                  X_gtp = X_gtp_all, X_itp = X_itp_kfold,
+	                  Xconfig_zcp = Xconfig_all)	
+	
+
+	Par <- fit0$tmb_list$Parameters
+	Map <- fit0$tmb_list$Map
+	Map[["beta1_ft"]] <- factor(rep(NA, length(Par[["beta1_ft"]])))
+	Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
+	Map[["logSigmaM"]] <- Par[["logSigmaM"]]
+	Map[["logSigmaM"]][,2:3] <- factor(NA)
+	Map[["logSigmaM"]] <- factor(Map[["logSigmaM"]])
+
+	# first model run
+	fit1 = fit_model( "settings"=settings, 
+	                  "Lat_i"=Data[,"Lat"], 
+	                  "Lon_i"=Data[,"Lon"], 
+	                  "t_iz"=Data[,'Year'], 
+	                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+	                  "b_i"=Data[,'Catch_KG'], 
+	                  "a_i"=Data[,'AreaSwept_km2'], 
+	                  "v_i"=Data[,'Vessel'], 
+	                  working_dir = path2,
+	                  extrapolation_args=list(
+	                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
+	                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+	                  Network_sz = Network_sz,
+	                  model_args = list(Map = Map),
+	                  X_gtp = X_gtp_all, X_itp = X_itp_kfold,
+	                  Xconfig_zcp = Xconfig_all,
+	                  optimize_args = list(getsd=FALSE, newtonsteps=0))
+	check <- TMBhelper::Check_Identifiable(fit1$tmb_list$Obj) 	
+
+	fit1$parameter_estimates$diagnostics	
+
+	## run the model
+	fit = fit_model( "settings"=settings, 
+	                  "Lat_i"=Data[,"Lat"], 
+	                  "Lon_i"=Data[,"Lon"], 
+	                  "t_iz"=Data[,'Year'], 
+	                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+	                  "b_i"=Data[,'Catch_KG'], 
+	                  "a_i"=Data[,'AreaSwept_km2'], 
+	                  "v_i"=Data[,'Vessel'], 
+	                  working_dir = path2,
+	                  extrapolation_args=list(
+	                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
+	                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+	                  Network_sz = Network_sz,
+	                  model_args = list(Map = Map),
+	                  X_gtp = X_gtp_all, X_itp = X_itp_kfold,
+	                  Xconfig_zcp = Xconfig_all)	
+
+	fit$parameter_estimates$diagnostics	
+
+	saveRDS(fit, file.path(path2, "Fit.rds"))    	
+
+	fit <- readRDS(file.path(path2, "Fit.rds")) 	
+
+	plot_maps(plot_set=c(1:7,11,13:14), Report=fit$Report, Sdreport=fit$parameter_estimates$SD, TmbData=fit$data_list, spatial_list=fit$spatial_list, DirName=fig2, category_names=c("Spawners","Juveniles"), cex=0.5)
+	plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, DirName=fig2, category_names=c("Spawners","Juveniles"))
+	map_list = make_map_info( "Region"=settings$Region, "spatial_list"=fit$spatial_list, "Extrapolation_List"=fit$extrapolation_list )
+	Enc_prob = plot_encounter_diagnostic( Report=fit$Report, Data_Geostat=cbind("Catch_KG"=fit$data_frame[,'b_i']), DirName=fig2)
+	plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig2, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names=c("Spawners","Juveniles"))
+	plot_residuals(fit = fit, Data = Data, Network_sz_LL = Network_sz_LL, category_names=c("Spawners","Juveniles"), FilePath=fig2)
+
+	rm(fit)
+	rm(fit1)
+
+}
+
+### CROSS VALIDATION
+########################
+## multivar_habitat_discrete
+#########################
+path <- file.path(sil_dir, 'loocv_multivar_habitat_discrete')
+dir.create(path, showWarnings=FALSE)
+setwd(path)
+
+fig <- file.path(path, "figures")
+dir.create(fig, showWarnings=FALSE)
+
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.cpp"), to = path)
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.dll"), to = path)
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.o"), to = path)
+
+
+rerun=TRUE
+for(gg in 1:nrow(Data_count)){
+	path2 <- file.path(path, paste0("Observation",gg))
+	dir.create(path2)
+
+	fig2 <- file.path(path2, "figures")
+	dir.create(fig2)
+
+	if(rerun==FALSE){
+		if(file.exists(file.path(path2, "Fit.rds"))) next
+	}
+
+	ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.cpp"), to = path2)
+	ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.dll"), to = path2)
+	ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.o"), to = path2)	
+
+	Data <- Data_count[-gg,]
+	# Data$Catch_KG[which(Data$Catch_KG > 0)] <- log(Data$Catch_KG[which(Data$Catch_KG > 0)])	
+
+	n_i_kfold <- nrow(Data)
+	X_itp_kfold <- array(0, dim=c(n_i_kfold,dim(X_gtp_all)[2],n_p))
+	for(i in 1:n_i_kfold){
+		for(p in 1:n_p){
+			knot <- Data$Knot[i]
+			index <- which(net_nodes == knot)
+			X_itp_kfold[i,,p] <- X_gtp_all[index,,p]
+		}
+	}
+
+	## turn on spatial and spatiotemporal effects
+	FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=2, "Epsilon2"=0)	
+
+	## IID structure on temporal intercepts
+	RhoConfig = c("Beta1"=3, "Beta2"=1, "Epsilon1"=0, "Epsilon2"=0)	
+
+	## gamma distribution, conventional delta link model
+	ObsModel = c("PosDist"=11,"Link"=0)	
+
+	## other options
+	OverdispersionConfig = c("Eta1"=0, "Eta2"=0)
+	Options =  c("Calculate_Range"=1, 
+	            "Calculate_effective_area"=1)	
+
+	## wrapper function to set up common settings
+	settings <- make_settings(n_x = nrow(Network_sz), Region = "Stream_network", FieldConfig=FieldConfig, RhoConfig=RhoConfig, OverdispersionConfig=OverdispersionConfig, Options=Options, ObsModel=ObsModel, purpose = "index", fine_scale=FALSE, bias.correct=FALSE)
+	settings$Method <- "Stream_network"
+	settings$grid_size_km <- 1	
+
+	# check estimated parameters
+	fit0 = fit_model( "settings"=settings, 
+	                  "Lat_i"=Data[,"Lat"], 
+	                  "Lon_i"=Data[,"Lon"], 
+	                  "t_iz"=Data[,'Year'], 
+	                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+	                  "b_i"=Data[,'Catch_KG'], 
+	                  "a_i"=Data[,'AreaSwept_km2'], 
+	                  working_dir=path2,
+	                  extrapolation_args=list(
+	                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])),
+	                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+	                  Network_sz = Network_sz,
+	                  run_model = FALSE,
+	                  X_gtp = X_gtp_all, X_itp = X_itp_kfold,
+	                  Xconfig_zcp = Xconfig_all)	
+	
+
+	Par <- fit0$tmb_list$Parameters
+	Map <- fit0$tmb_list$Map
+	Map[["beta1_ft"]] <- factor(rep(NA, length(Par[["beta1_ft"]])))
+	Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
+	Map[["logSigmaM"]] <- Par[["logSigmaM"]]
+	Map[["logSigmaM"]][,2:3] <- factor(NA)
+	Map[["logSigmaM"]] <- factor(Map[["logSigmaM"]])
+
+	# first model run
+	fit1 = fit_model( "settings"=settings, 
+	                  "Lat_i"=Data[,"Lat"], 
+	                  "Lon_i"=Data[,"Lon"], 
+	                  "t_iz"=Data[,'Year'], 
+	                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+	                  "b_i"=Data[,'Catch_KG'], 
+	                  "a_i"=Data[,'AreaSwept_km2'], 
+	                  "v_i"=Data[,'Vessel'], 
+	                  working_dir = path2,
+	                  extrapolation_args=list(
+	                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
+	                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+	                  Network_sz = Network_sz,
+	                  model_args = list(Map = Map),
+	                  X_gtp = X_gtp_all, X_itp = X_itp_kfold,
+	                  Xconfig_zcp = Xconfig_all,
+	                  optimize_args = list(getsd=FALSE, newtonsteps=0))
+	check <- TMBhelper::Check_Identifiable(fit1$tmb_list$Obj) 	
+
+	fit1$parameter_estimates$diagnostics	
+
+	## run the model
+	fit = fit_model( "settings"=settings, 
+	                  "Lat_i"=Data[,"Lat"], 
+	                  "Lon_i"=Data[,"Lon"], 
+	                  "t_iz"=Data[,'Year'], 
+	                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+	                  "b_i"=Data[,'Catch_KG'], 
+	                  "a_i"=Data[,'AreaSwept_km2'], 
+	                  "v_i"=Data[,'Vessel'], 
+	                  working_dir = path2,
+	                  extrapolation_args=list(
+	                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
+	                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+	                  Network_sz = Network_sz,
+	                  model_args = list(Map = Map),
+	                  X_gtp = X_gtp_all, X_itp = X_itp_kfold,
+	                  Xconfig_zcp = Xconfig_all)	
+
+	fit$parameter_estimates$diagnostics	
+
+	saveRDS(fit, file.path(path2, "Fit.rds"))    	
+
+	fit <- readRDS(file.path(path2, "Fit.rds")) 	
+
+	plot_maps(plot_set=c(1:7), Report=fit$Report, Sdreport=fit$parameter_estimates$SD, TmbData=fit$data_list, spatial_list=fit$spatial_list, DirName=fig2, category_names=c("Spawners","Juveniles"), cex=0.5)
+	plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, DirName=fig2, category_names=c("Spawners","Juveniles"))
+	map_list = make_map_info( "Region"=settings$Region, "spatial_list"=fit$spatial_list, "Extrapolation_List"=fit$extrapolation_list )
+	Enc_prob = plot_encounter_diagnostic( Report=fit$Report, Data_Geostat=cbind("Catch_KG"=fit$data_frame[,'b_i']), DirName=fig2)
+	plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig2, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names=c("Spawners","Juveniles"))
+	plot_residuals(fit = fit, Data = Data, Network_sz_LL = Network_sz_LL, category_names=c("Spawners","Juveniles"), FilePath=fig2)
+
+	rm(fit)
+	rm(fit1)
+
+}
+
+### CROSS VALIDATION
+########################
+## multivar_random_habitat_discrete
+#########################
+path <- file.path(sil_dir, 'crossval_random_multivar_habitat_discrete')
+dir.create(path, showWarnings=FALSE)
+setwd(path)
+
+fig <- file.path(path, "figures")
+dir.create(fig, showWarnings=FALSE)
+
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.cpp"), to = path)
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.dll"), to = path)
+ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.o"), to = path)
+
+# Data_kfold_spawn <- Data_count_spawn 
+# Data_kfold_spawn$Group <- sample(1:10, nrow(Data_kfold_spawn), replace=TRUE)
+# Data_kfold_juv <- Data_count_juv 
+# Data_kfold_juv$Group <- sample(1:10, nrow(Data_kfold_juv), replace=TRUE)
+# Data_kfold <- rbind.data.frame(Data_kfold_spawn, Data_kfold_juv)
+
+Data_kfold <- Data_count
+Data_kfold$Group <- sample(1:10, nrow(Data_kfold), replace=TRUE)
+
+table(Data_kfold$Group)
+
+rerun=TRUE
+for(gg in 1:10){
+	path2 <- file.path(path, paste0("Group",gg))
+	dir.create(path2)
+
+	fig2 <- file.path(path2, "figures")
+	dir.create(fig2)
+
+	if(rerun==FALSE){
+		if(file.exists(file.path(path2, "Fit.rds"))) next
+	}
+
+	ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.cpp"), to = path2)
+	ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.dll"), to = path2)
+	ignore <- file.copy(from = file.path(sil_dir, "VAST_v8_2_0.o"), to = path2)	
+
+	Data <- Data_kfold %>% filter(Group != gg)
+	# Data$Catch_KG[which(Data$Catch_KG > 0)] <- log(Data$Catch_KG[which(Data$Catch_KG > 0)])	
+
+	n_i_kfold <- nrow(Data)
+	X_itp_kfold <- array(0, dim=c(n_i_kfold,n_t,n_p))
+	for(i in 1:n_i_kfold){
+		for(p in 1:n_p){
+			knot <- Data$Knot[i]
+			index <- which(net_nodes == knot)
+			X_itp_kfold[i,,p] <- X_gtp_all[index,,p]
+		}
+	}
+
+	## turn on spatial and spatiotemporal effects
+	FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=2, "Epsilon2"=0)	
+
+	## IID structure on temporal intercepts
+	RhoConfig = c("Beta1"=3, "Beta2"=1, "Epsilon1"=0, "Epsilon2"=0)	
+
+	## gamma distribution, conventional delta link model
+	ObsModel = c("PosDist"=11,"Link"=0)	
+
+	## other options
+	OverdispersionConfig = c("Eta1"=0, "Eta2"=0)
+	Options =  c("Calculate_Range"=1, 
+	            "Calculate_effective_area"=1)	
+
+	## wrapper function to set up common settings
+	settings <- make_settings(n_x = nrow(Network_sz), Region = "Stream_network", FieldConfig=FieldConfig, RhoConfig=RhoConfig, OverdispersionConfig=OverdispersionConfig, Options=Options, ObsModel=ObsModel, purpose = "index", fine_scale=FALSE, bias.correct=FALSE)
+	settings$Method <- "Stream_network"
+	settings$grid_size_km <- 1	
+
+	# check estimated parameters
+	fit0 = fit_model( "settings"=settings, 
+	                  "Lat_i"=Data[,"Lat"], 
+	                  "Lon_i"=Data[,"Lon"], 
+	                  "t_iz"=Data[,'Year'], 
+	                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+	                  "b_i"=Data[,'Catch_KG'], 
+	                  "a_i"=Data[,'AreaSwept_km2'], 
+	                  working_dir=path2,
+	                  extrapolation_args=list(
+	                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])),
+	                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+	                  Network_sz = Network_sz,
+	                  run_model = FALSE,
+	                  X_gtp = X_gtp_all, X_itp = X_itp_kfold,
+	                  Xconfig_zcp = Xconfig_all)	
+	
+
+	Par <- fit0$tmb_list$Parameters
+	Map <- fit0$tmb_list$Map
+	Map[["beta1_ft"]] <- factor(rep(NA, length(Par[["beta1_ft"]])))
+	Map[["gamma1_ctp"]] <- factor(rep(NA, length(Par[["gamma1_ctp"]])))
+	Map[["logSigmaM"]] <- Par[["logSigmaM"]]
+	Map[["logSigmaM"]][,2:3] <- factor(NA)
+	Map[["logSigmaM"]] <- factor(Map[["logSigmaM"]])
+
+	# first model run
+	fit1 = fit_model( "settings"=settings, 
+	                  "Lat_i"=Data[,"Lat"], 
+	                  "Lon_i"=Data[,"Lon"], 
+	                  "t_iz"=Data[,'Year'], 
+	                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+	                  "b_i"=Data[,'Catch_KG'], 
+	                  "a_i"=Data[,'AreaSwept_km2'], 
+	                  "v_i"=Data[,'Vessel'], 
+	                  working_dir = path2,
+	                  extrapolation_args=list(
+	                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
+	                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+	                  Network_sz = Network_sz,
+	                  model_args = list(Map = Map),
+	                  X_gtp = X_gtp_all, X_itp = X_itp_kfold,
+	                  Xconfig_zcp = Xconfig_all,
+	                  optimize_args = list(getsd=FALSE, newtonsteps=0))
+	check <- TMBhelper::Check_Identifiable(fit1$tmb_list$Obj) 	
+
+	fit1$parameter_estimates$diagnostics	
+
+	## run the model
+	fit = fit_model( "settings"=settings, 
+	                  "Lat_i"=Data[,"Lat"], 
+	                  "Lon_i"=Data[,"Lon"], 
+	                  "t_iz"=Data[,'Year'], 
+	                  "c_i"=as.numeric(Data[,"CategoryNum"])-1, 
+	                  "b_i"=Data[,'Catch_KG'], 
+	                  "a_i"=Data[,'AreaSwept_km2'], 
+	                  "v_i"=Data[,'Vessel'], 
+	                  working_dir = path2,
+	                  extrapolation_args=list(
+	                    input_grid=cbind("Lat"=Data[,"Lat"], "Lon"=Data[,"Lon"],"child_i"=Data[,"Knot"],"Area_km2"=Data[,"AreaSwept_km2"])), 
+	                  spatial_args=list(Network_sz_LL=Network_sz_LL),
+	                  Network_sz = Network_sz,
+	                  model_args = list(Map = Map),
+	                  X_gtp = X_gtp_all, X_itp = X_itp_kfold,
+	                  Xconfig_zcp = Xconfig_all)	
+
+	fit$parameter_estimates$diagnostics	
+
+	saveRDS(fit, file.path(path2, "Fit.rds"))    	
+
+	fit <- readRDS(file.path(path2, "Fit.rds")) 	
+
+	plot_maps(plot_set=c(1:7,11,13:14), Report=fit$Report, Sdreport=fit$parameter_estimates$SD, TmbData=fit$data_list, spatial_list=fit$spatial_list, DirName=fig2, category_names=c("Spawners","Juveniles"), cex=0.5)
+	plot_biomass_index(TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, DirName=fig2, category_names=c("Spawners","Juveniles"))
+	map_list = make_map_info( "Region"=settings$Region, "spatial_list"=fit$spatial_list, "Extrapolation_List"=fit$extrapolation_list )
+	Enc_prob = plot_encounter_diagnostic( Report=fit$Report, Data_Geostat=cbind("Catch_KG"=fit$data_frame[,'b_i']), DirName=fig2)
+	plot_range_index(Report=fit$Report, TmbData=fit$data_list, Sdreport=fit$parameter_estimates$SD, Znames=colnames(fit$data_list$Z_xm), PlotDir=fig2, Year_Set=fit$years_to_plot, use_biascorr=TRUE, category_names=c("Spawners","Juveniles"))
+	plot_residuals(fit = fit, Data = Data, Network_sz_LL = Network_sz_LL, category_names=c("Spawners","Juveniles"), FilePath=fig2)
+
+	rm(fit)
+	rm(fit1)
+
+}
+
+
 
 
