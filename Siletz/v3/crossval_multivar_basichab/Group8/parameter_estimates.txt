@@ -1,0 +1,64 @@
+$par
+     beta1_ft      beta1_ft    gamma1_ctp    gamma1_ctp    gamma1_ctp    gamma1_ctp    gamma2_ctp    gamma2_ctp 
+ 6.307055e+01  5.076476e-01 -2.284815e+01 -2.693468e-01  5.410837e+01  1.336466e+00  1.244079e-03  1.417584e-01 
+   gamma2_ctp    gamma2_ctp    L_omega2_z    L_omega2_z    L_omega2_z  L_epsilon2_z  L_epsilon2_z  L_epsilon2_z 
+ 3.051506e-01  5.385511e-01  1.088807e+00  4.841752e-01 -1.237673e+00  3.553293e-01 -9.289442e-01  2.507577e-04 
+    L_beta2_z     L_beta2_z     logkappa2  Beta_mean2_c  Beta_mean2_c     logSigmaM     logSigmaM 
+ 1.001884e+00  7.511907e-01 -1.443566e+00  1.626147e+00  4.062540e+00 -5.551927e-01 -6.904023e+00 
+
+$objective
+[1] 1895.109
+attr(,"logarithm")
+[1] TRUE
+
+$iterations
+[1] 1
+
+$evaluations
+function gradient 
+       2        1 
+
+$time_for_MLE
+Time difference of 21.08754 secs
+
+$max_gradient
+[1] 0.001558
+
+$Convergence_check
+[1] "The model is likely not converged"
+
+$number_of_coefficients
+ Total  Fixed Random 
+ 69609     23  69586 
+
+$AIC
+[1] 3836.219
+attr(,"logarithm")
+[1] TRUE
+
+$diagnostics
+          Param starting_value Lower           MLE Upper final_gradient
+1      beta1_ft   5.195870e+01  -Inf  6.307055e+01   Inf   2.823653e-04
+2      beta1_ft   5.076442e-01  -Inf  5.076476e-01   Inf  -4.129891e-12
+3    gamma1_ctp  -1.563022e+01  -Inf -2.284815e+01   Inf   2.700640e-04
+4    gamma1_ctp  -2.693470e-01  -Inf -2.693468e-01   Inf  -3.395506e-12
+5    gamma1_ctp   4.832754e+01  -Inf  5.410837e+01   Inf  -2.052428e-04
+6    gamma1_ctp   1.336467e+00  -Inf  1.336466e+00   Inf  -1.607101e-11
+7    gamma2_ctp   1.241318e-03  -Inf  1.244079e-03   Inf   2.639447e-05
+8    gamma2_ctp   1.417615e-01  -Inf  1.417584e-01   Inf   7.284456e-06
+9    gamma2_ctp   3.051634e-01  -Inf  3.051506e-01   Inf  -5.026822e-04
+10   gamma2_ctp   5.385416e-01  -Inf  5.385511e-01   Inf   2.823751e-05
+11   L_omega2_z   1.088800e+00  -Inf  1.088807e+00   Inf   1.263487e-03
+12   L_omega2_z   4.841840e-01  -Inf  4.841752e-01   Inf  -2.111750e-05
+13   L_omega2_z  -1.237644e+00  -Inf -1.237673e+00   Inf  -6.484656e-05
+14 L_epsilon2_z   3.553189e-01  -Inf  3.553293e-01   Inf   1.288471e-03
+15 L_epsilon2_z  -9.289825e-01  -Inf -9.289442e-01   Inf  -5.731451e-06
+16 L_epsilon2_z   5.775372e-04  -Inf  2.507577e-04   Inf   7.876742e-05
+17    L_beta2_z   1.001894e+00  -Inf  1.001884e+00   Inf  -3.587592e-04
+18    L_beta2_z   7.511871e-01  -Inf  7.511907e-01   Inf  -7.691606e-06
+19    logkappa2  -1.443643e+00  -Inf -1.443566e+00   Inf   7.083478e-04
+20 Beta_mean2_c   1.626134e+00  -Inf  1.626147e+00   Inf   1.609830e-05
+21 Beta_mean2_c   4.062560e+00  -Inf  4.062540e+00   Inf   1.560964e-05
+22    logSigmaM  -5.551879e-01  -Inf -5.551927e-01    10   1.558000e-03
+23    logSigmaM  -6.620031e+00  -Inf -6.904023e+00    10   4.209663e-07
+

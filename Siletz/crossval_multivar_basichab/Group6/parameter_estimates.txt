@@ -1,0 +1,92 @@
+$par
+     beta1_ft      beta1_ft    gamma2_ctp    gamma2_ctp    gamma2_ctp 
+ 3.241563e+00  1.810109e+00 -5.712483e-02 -4.012979e-02  3.465546e-01 
+   gamma2_ctp    L_omega2_z    L_omega2_z    L_omega2_z  L_epsilon2_z 
+ 6.557068e-01 -1.062264e+00 -9.650293e-01  1.060168e+00  3.859471e-01 
+ L_epsilon2_z  L_epsilon2_z     L_beta2_z     L_beta2_z     logkappa2 
+-7.187499e-01  5.498777e-08  9.636818e-01  6.104386e-01 -1.344462e+00 
+ Beta_mean2_c  Beta_mean2_c     logSigmaM     logSigmaM 
+ 1.594239e+00  4.029738e+00 -7.100265e-01 -6.721382e+00 
+
+$objective
+[1] 1936.535
+attr(,"logarithm")
+[1] TRUE
+
+$iterations
+[1] 1
+
+$evaluations
+function gradient 
+      12        1 
+
+$time_for_MLE
+Time difference of 1.059783 mins
+
+$max_gradient
+[1] 2.361718e-05
+
+$Convergence_check
+[1] "There is no evidence that the model is not converged"
+
+$number_of_coefficients
+ Total  Fixed Random 
+ 69606     19  69587 
+
+$AIC
+[1] 3911.069
+attr(,"logarithm")
+[1] TRUE
+
+$diagnostics
+          Param starting_value Lower           MLE Upper final_gradient
+1      beta1_ft   3.2415585857  -Inf  3.241563e+00   Inf  -2.437340e-09
+2      beta1_ft   1.8101026049  -Inf  1.810109e+00   Inf   0.000000e+00
+3    gamma2_ctp  -0.0571235089  -Inf -5.712483e-02   Inf  -1.735810e-08
+4    gamma2_ctp  -0.0401305193  -Inf -4.012979e-02   Inf  -1.652391e-08
+5    gamma2_ctp   0.3465534370  -Inf  3.465546e-01   Inf  -8.121503e-11
+6    gamma2_ctp   0.6557025820  -Inf  6.557068e-01   Inf   2.762225e-08
+7    L_omega2_z  -1.0622655844  -Inf -1.062264e+00   Inf   4.248363e-09
+8    L_omega2_z  -0.9650286365  -Inf -9.650293e-01   Inf   2.361718e-05
+9    L_omega2_z   1.0601641068  -Inf  1.060168e+00   Inf   1.094057e-05
+10 L_epsilon2_z   0.3859554751  -Inf  3.859471e-01   Inf  -1.026046e-08
+11 L_epsilon2_z  -0.7188241537  -Inf -7.187499e-01   Inf  -4.589135e-06
+12 L_epsilon2_z   0.0003584004  -Inf  5.498777e-08   Inf   5.163013e-09
+13    L_beta2_z   0.9636817650  -Inf  9.636818e-01   Inf  -5.301715e-10
+14    L_beta2_z   0.6104384415  -Inf  6.104386e-01   Inf   1.383687e-05
+15    logkappa2  -1.3445089374  -Inf -1.344462e+00   Inf   8.033616e-08
+16 Beta_mean2_c   1.5942429680  -Inf  1.594239e+00   Inf  -6.839485e-09
+17 Beta_mean2_c   4.0297742061  -Inf  4.029738e+00   Inf   1.732612e-08
+18    logSigmaM  -0.7100357659  -Inf -7.100265e-01    10  -7.410598e-09
+19    logSigmaM  -5.3976099072  -Inf -6.721382e+00    10   2.382502e-07
+
+$SD
+sdreport(.) result
+                  Estimate   Std. Error
+beta1_ft      3.241563e+00    0.4286687
+beta1_ft      1.810109e+00    0.3595733
+gamma2_ctp   -5.712483e-02    0.1154325
+gamma2_ctp   -4.012979e-02    0.1746778
+gamma2_ctp    3.465546e-01    0.1549241
+gamma2_ctp    6.557068e-01    0.3274196
+L_omega2_z   -1.062264e+00    0.1317056
+L_omega2_z   -9.650293e-01    0.2906133
+L_omega2_z    1.060168e+00    0.3496966
+L_epsilon2_z  3.859471e-01    0.1356455
+L_epsilon2_z -7.187499e-01    0.4738687
+L_epsilon2_z  5.498777e-08    3.2631061
+L_beta2_z     9.636818e-01    0.1666013
+L_beta2_z     6.104386e-01    0.3029127
+logkappa2    -1.344462e+00    0.3616973
+Beta_mean2_c  1.594239e+00    0.3312164
+Beta_mean2_c  4.029738e+00    0.4846180
+logSigmaM    -7.100265e-01    0.2085404
+logSigmaM    -6.721382e+00 1673.0002316
+Maximum gradient component: 2.361718e-05 
+
+$time_for_sdreport
+Time difference of 32.50698 secs
+
+$time_for_run
+Time difference of 1.606752 mins
+

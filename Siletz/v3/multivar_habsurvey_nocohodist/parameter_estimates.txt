@@ -1,0 +1,102 @@
+$par
+     beta1_ft      beta1_ft    gamma2_ctp    gamma2_ctp    gamma2_ctp    gamma2_ctp 
+ 3.716758e+00  1.592631e+00 -4.089735e-01 -8.790463e-01  2.456290e-01  4.435527e-02 
+   gamma2_ctp    gamma2_ctp    gamma2_ctp    gamma2_ctp    gamma2_ctp    gamma2_ctp 
+-6.766538e-02  1.371334e-01  5.008048e-02 -5.739233e-01 -4.157722e-02  3.561024e-01 
+   L_omega2_z    L_omega2_z    L_omega2_z  L_epsilon2_z  L_epsilon2_z  L_epsilon2_z 
+-1.112018e+00 -2.136934e-01 -2.221118e-14 -3.900045e-01  8.139833e-02  1.411224e-14 
+    L_beta2_z     L_beta2_z     logkappa2  Beta_mean2_c  Beta_mean2_c     logSigmaM 
+ 1.020926e+00  3.555181e-15 -1.772331e+00 -6.339756e-01  1.682399e+01 -6.295578e-01 
+
+$objective
+[1] 2168.026
+attr(,"logarithm")
+[1] TRUE
+
+$iterations
+[1] 2
+
+$evaluations
+function gradient 
+      14        2 
+
+$time_for_MLE
+Time difference of 1.63016 mins
+
+$max_gradient
+[1] 5.738705e-10
+
+$Convergence_check
+[1] "There is no evidence that the model is not converged"
+
+$number_of_coefficients
+ Total  Fixed Random 
+ 69652     24  69628 
+
+$AIC
+[1] 4384.051
+attr(,"logarithm")
+[1] TRUE
+
+$diagnostics
+          Param starting_value Lower           MLE Upper final_gradient
+1      beta1_ft   3.716843e+00  -Inf  3.716758e+00   Inf   5.753731e-13
+2      beta1_ft   1.592472e+00  -Inf  1.592631e+00   Inf   7.983563e-15
+3    gamma2_ctp  -4.090146e-01  -Inf -4.089735e-01   Inf   3.275602e-12
+4    gamma2_ctp  -8.792183e-01  -Inf -8.790463e-01   Inf  -2.139444e-11
+5    gamma2_ctp   2.455676e-01  -Inf  2.456290e-01   Inf  -1.321609e-11
+6    gamma2_ctp   4.449825e-02  -Inf  4.435527e-02   Inf   3.301937e-11
+7    gamma2_ctp  -6.764628e-02  -Inf -6.766538e-02   Inf  -1.478373e-12
+8    gamma2_ctp   1.370581e-01  -Inf  1.371334e-01   Inf  -1.095568e-11
+9    gamma2_ctp   5.012729e-02  -Inf  5.008048e-02   Inf  -5.861978e-14
+10   gamma2_ctp  -5.740587e-01  -Inf -5.739233e-01   Inf  -2.584599e-12
+11   gamma2_ctp  -4.160333e-02  -Inf -4.157722e-02   Inf  -1.786482e-11
+12   gamma2_ctp   3.561541e-01  -Inf  3.561024e-01   Inf   3.737455e-12
+13   L_omega2_z  -1.111961e+00  -Inf -1.112018e+00   Inf   2.019362e-11
+14   L_omega2_z  -2.140379e-01  -Inf -2.136934e-01   Inf  -5.738705e-10
+15   L_omega2_z  -1.063929e-04  -Inf -2.221118e-14   Inf  -4.562758e-14
+16 L_epsilon2_z  -3.899972e-01  -Inf -3.900045e-01   Inf  -6.421530e-12
+17 L_epsilon2_z   8.133461e-02  -Inf  8.139833e-02   Inf   4.454250e-10
+18 L_epsilon2_z  -1.303765e-04  -Inf  1.411224e-14   Inf   2.953937e-14
+19    L_beta2_z   1.020939e+00  -Inf  1.020926e+00   Inf   4.547474e-13
+20    L_beta2_z   8.102611e-05  -Inf  3.555181e-15   Inf   6.314454e-14
+21    logkappa2  -1.771854e+00  -Inf -1.772331e+00   Inf   6.415057e-11
+22 Beta_mean2_c  -6.340382e-01  -Inf -6.339756e-01   Inf  -5.684342e-13
+23 Beta_mean2_c   1.682408e+01  -Inf  1.682399e+01   Inf   4.693135e-11
+24    logSigmaM  -6.296350e-01  -Inf -6.295578e-01    10  -1.421085e-13
+
+$SD
+sdreport(.) result
+                  Estimate Std. Error
+beta1_ft      3.716758e+00  0.5021544
+beta1_ft      1.592631e+00  0.3166741
+gamma2_ctp   -4.089735e-01  0.2140227
+gamma2_ctp   -8.790463e-01  1.5685609
+gamma2_ctp    2.456290e-01  0.1728282
+gamma2_ctp    4.435527e-02  0.7031022
+gamma2_ctp   -6.766538e-02  0.1172670
+gamma2_ctp    1.371334e-01  0.5800894
+gamma2_ctp    5.008048e-02  0.2000380
+gamma2_ctp   -5.739233e-01  0.6714477
+gamma2_ctp   -4.157722e-02  0.6408436
+gamma2_ctp    3.561024e-01  0.1610285
+L_omega2_z   -1.112018e+00  0.1995806
+L_omega2_z   -2.136934e-01  0.7762272
+L_omega2_z   -2.221118e-14  0.6977054
+L_epsilon2_z -3.900045e-01  0.1321913
+L_epsilon2_z  8.139833e-02  0.6858146
+L_epsilon2_z  1.411224e-14  0.6911899
+L_beta2_z     1.020926e+00  0.1873275
+L_beta2_z     3.555181e-15  0.2372823
+logkappa2    -1.772331e+00  0.7291753
+Beta_mean2_c -6.339756e-01  1.0991635
+Beta_mean2_c  1.682399e+01  1.0607682
+logSigmaM    -6.295578e-01  0.1839752
+Maximum gradient component: 5.738705e-10 
+
+$time_for_sdreport
+Time difference of 39.84516 secs
+
+$time_for_run
+Time difference of 2.304719 mins
+
